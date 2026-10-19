@@ -10,3 +10,15 @@ cookies*.txt
 browser-profile/
 scroll-sessions/
 dataset/
+
+# --- Node / SvelteKit app ---
+node_modules/
+.svelte-kit/
+build/
+build-cli/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.env.local
+*.token

@@ -16,6 +16,11 @@ headless   = false
 channel    = ""                       # "" = Playwright's own Chromium (never your Chrome profile)
 viewport   = [1280, 900]
 max_restarts = 5                      # browser crashes/restarts tolerated per session
+gpu        = "software"               # software = Chromium never touches the GPU (recommended: see docs/RESOURCES.md) | auto
+mute       = true
+max_tabs   = 3                        # surplus tabs are closed
+recycle_after_reels = 60              # restart OUR browser (login persists) every N reels ...
+recycle_after_min   = 20              # ... or N minutes, whichever first (0 disables)
 
 [llm]                                 # the cheap text-only agent that steers browsing (never sees video)
 api        = "sarness"                # "sarness" = reuse Sarness Desktop's profile + keyring token | "openai" | "ollama"
@@ -43,7 +48,9 @@ max_consecutive_failures = 8
 explore_rate = 0.25                   # heuristic fallback: chance to keep a reel with no keyword match
 mode = "fast"                         # fast = glance 5-7 s and queue the full download | normal = steer + watch
 fast_dwell_s = [5.0, 7.0]
-download_workers = 2                  # concurrent downloads in fast mode (be conservative)
+download_workers = 2                  # concurrent downloads in fast mode (hard cap: max_download_workers)
+max_download_workers = 4
+download_nice = 10                    # yt-dlp/ffmpeg run at lower CPU priority
 queue_max = 40                        # browsing pauses when this many downloads are waiting
 creator_reels_limit = 12              # reels taken from each creator profile (--source creators)
 creators_max = 20
@@ -62,3 +69,15 @@ dwell_s = [6.0, 12.0]                 # natural watch time: training must not lo
 max_frames = 40
 frame_width = 768
 scene_threshold = 0.30
+
+[limits]                              # resource guard: pause, then stop SAFELY before the desktop can freeze
+# pause_mem_available_mb = 3000       # browsing waits until free RAM recovers
+# stop_mem_available_mb  = 1200       # everything is saved, then the collector stops (--resume continues)
+# pause_swap_used_pct = 40
+# stop_swap_used_pct  = 80
+# pause_disk_free_gb  = 6
+# stop_disk_free_gb   = 2
+# pause_gpu_used_pct  = 85
+# recycle_owned_gpu_mb = 1200         # restart the collector browser if IT holds this much GPU memory
+# recycle_owned_rss_mb = 3500
+# stop_on_gpu_driver_errors = true    # NVRM VA-space / RC-watchdog lines in the kernel log during the run

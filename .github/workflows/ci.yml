@@ -1,0 +1,33 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: npm }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Node deps, typecheck, build
+        run: |
+          npm ci
+          npm run check
+          npx tsc -p core/tsconfig.json
+          npm run build
+      - name: Python deps (venv used by the collector and the push client)
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/python -m playwright install --with-deps chromium
+      - name: TypeScript tests (incl. production-server end-to-end)
+        run: npm test
+      - name: Python tests (collector e2e on a local mock site, resource safety)
+        run: .venv/bin/python -m pytest tests -q
+      - name: Dependency audit
+        run: npm audit --omit=dev

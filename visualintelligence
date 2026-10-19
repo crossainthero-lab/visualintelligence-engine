@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Repository-local launcher:  ./visualintelligence status | videos list | analyse ... | serve | mcp
+exec node "$(dirname "$(readlink -f "$0")")/bin/visualintelligence.mjs" "$@"
