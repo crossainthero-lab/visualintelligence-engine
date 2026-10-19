@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# local config + anything session/credential related never goes to git
+config.toml
+.env
+*.cookies
+cookies*.txt
+browser-profile/
+scroll-sessions/
+dataset/

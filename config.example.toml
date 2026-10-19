@@ -1,0 +1,64 @@
+# Copy to config.toml (git-ignored). Every key is optional.
+# Environment overrides: VIE_LLM_ENDPOINT, VIE_LLM_MODEL, VIE_LLM_API_KEY, VIE_SESSIONS_DIR, VIE_STATE_DIR
+
+[paths]
+sessions_dir = "scroll-sessions"                      # relative to this repo
+state_dir    = "~/.local/share/visualintelligence-engine"  # dedicated browser profile + cookies (NOT in the repo)
+
+[instagram]
+account    = "your_instagram_username"          # informational; recorded in session.json
+base_url   = "https://www.instagram.com"
+start_url  = "https://www.instagram.com/reels/"
+login_timeout_s = 1800                # how long the collector waits for you to log in manually
+
+[browser]
+headless   = false
+channel    = ""                       # "" = Playwright's own Chromium (never your Chrome profile)
+viewport   = [1280, 900]
+max_restarts = 5                      # browser crashes/restarts tolerated per session
+
+[llm]                                 # the cheap text-only agent that steers browsing (never sees video)
+api        = "sarness"                # "sarness" = reuse Sarness Desktop's profile + keyring token | "openai" | "ollama"
+endpoint   = ""                       # "" = from the Sarness profile (192.168.1.60:8742)
+sarness_profile = ""                  # "" = the profile active in Sarness Desktop
+api_key_env = "VIE_LLM_API_KEY"       # optional: override the token via this env var (never stored in files)
+model      = "qwen3-coder:30b"        # tested: ~1 s/decision. qwen3.5:9b never stops "thinking" via this API.
+                                      # "" = smallest model the server offers
+timeout_s  = 90
+temperature = 0.4
+interest   = """Motion graphics, 2D/3D animation, VFX/compositing, advertising and product films,
+filmmaking and cinematography, title design/kinetic typography, creative production breakdowns.
+Skip memes, talking heads, vlogs, reposts and anything with no visual-craft value."""
+
+[collector]
+max_videos = 0                        # 0 = unlimited (stop with Ctrl+C)
+max_minutes = 0                       # 0 = unlimited
+dwell_s = [3.0, 9.0]                  # natural watch time before deciding/scrolling
+open_permalink = true                 # open each reel in a second tab before downloading
+download_retries = 3
+retry_backoff_s = [5, 20, 60]
+download_timeout_s = 300
+dedupe_across_sessions = true
+max_consecutive_failures = 8
+explore_rate = 0.25                   # heuristic fallback: chance to keep a reel with no keyword match
+mode = "fast"                         # fast = glance 5-7 s and queue the full download | normal = steer + watch
+fast_dwell_s = [5.0, 7.0]
+download_workers = 2                  # concurrent downloads in fast mode (be conservative)
+queue_max = 40                        # browsing pauses when this many downloads are waiting
+creator_reels_limit = 12              # reels taken from each creator profile (--source creators)
+creators_max = 20
+format = "bestvideo*+bestaudio/best"  # yt-dlp format selector: best available, no re-encode
+
+[analysis]
+auto_order = ["claude", "codex"]      # Auto picks the first usable agent in this order
+claude_model = ""                     # "" = Claude Code default
+codex_model  = ""                     # "" = Codex default
+permissions  = "scoped"               # scoped | ask   (see README; never "bypass")
+
+[train]                               # ./collect.sh --mode train (interactive, approve every action)
+dwell_s = [6.0, 12.0]                 # natural watch time: training must not look like rapid skipping
+
+[prep]                                # deterministic FFmpeg pre-processing (no AI)
+max_frames = 40
+frame_width = 768
+scene_threshold = 0.30
