@@ -1,0 +1,11 @@
+{
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"strict": true,
+		"allowImportingTsExtensions": true,
+		"erasableSyntaxOnly": true,
+		"noEmit": true,
+		"types": ["node", "$app/types"]
+	},
+	"include": ["src", "core", "cli", "bin", "tests-js", "vite.config.ts"]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "visualintelligence-engine",
+  "version": "0.2.0",
+  "description": "Self-hosted visual intelligence research platform: collect, organise, inspect and analyse videos with the agent runtimes you already have.",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "bin": {
+    "visualintelligence": "./bin/visualintelligence.mjs"
+  },
+  "scripts": {
+    "dev": "node bin/dev.mjs",
+    "build": "vite build",
+    "start": "node bin/start.mjs",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "vi": "node bin/visualintelligence.mjs"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-node": "^6.0.0",
+    "@sveltejs/kit": "^3.1.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@types/node": "^24.0.0",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^4.6.7"
+  },
+  "imports": {
+    "#core/*": "./core/*",
+    "#lib/*": "./src/lib/*"
+  }
+}

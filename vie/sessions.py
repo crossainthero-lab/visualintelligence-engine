@@ -122,6 +122,19 @@ class Session:
                 except FileExistsError:
                     n += 1
         os.unlink(tmp_file)
+        try:  # make the data durable BEFORE the metadata says 'downloaded' (a freeze left 0-byte files before this)
+            fd = os.open(dest, os.O_RDONLY)
+            try:
+                os.fsync(fd)
+            finally:
+                os.close(fd)
+            dfd = os.open(self.videos_dir, os.O_RDONLY)
+            try:
+                os.fsync(dfd)
+            finally:
+                os.close(dfd)
+        except OSError:
+            pass
         os.chmod(dest, 0o444)  # originals are read-only
         return dest
 
@@ -179,6 +192,10 @@ def recover_stale_sessions(sessions_dir: Path, skip: str | None = None) -> list[
         for e in meta.get("videos", []):
             if e.get("status") in ("downloading",):
                 e["status"] = "queued"
+            elif e.get("status") == "downloaded" and e.get("file"):  # truncated by the crash: queue for --resume
+                fp = d / e["file"]
+                if not fp.is_file() or fp.stat().st_size == 0:
+                    e.update(status="queued", error="file truncated or missing after a crash", file=None)
         info.update(status="interrupted", ended_at=info.get("ended_at") or now_iso(),
                     stop_reason=info.get("stop_reason") or "recovered: collector process died (crash, kill or freeze)",
                     recovered=True)
