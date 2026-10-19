@@ -45,7 +45,8 @@ export async function sarnessConn(): Promise<Conn | null> {
 	const st = getSettings().sarness;
 	const p = profiles();
 	const prof = p?.profiles?.find((x: any) => x.id === p.active || x.name === st.profile) ?? p?.profiles?.[0];
-	const base = (st.endpoint || (prof ? `${prof.scheme ?? 'http'}://${prof.host}:${prof.port}` : `http://${st.host}:8742`)).replace(/\/$/, '');
+	const base = (st.endpoint || (prof ? `${prof.scheme ?? 'http'}://${prof.host}:${prof.port}` : st.host ? `http://${st.host}:8742` : "")).replace(/\/$/, '');
+	if (!base) return null;
 	const { token, source } = await readToken(prof?.id ?? '');
 	return { base, token, profile: prof?.name ?? '(none)', source };
 }

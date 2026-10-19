@@ -34,7 +34,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	collector: { sessionsDir: '' },
 	server: { trustedLan: false, requireAuth: false },
 	retention: { keepAnalysisRawDays: 365, keepCacheDays: 14 },
-	sarness: { host: '192.168.1.60', sshAlias: '', profile: '', endpoint: '' }
+	sarness: { host: '', sshAlias: '', profile: '', endpoint: '' }
 };
 
 function merge<T>(base: T, over: any): T {
