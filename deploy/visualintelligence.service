@@ -1,0 +1,34 @@
+# systemd unit for the dashboard / server edition. Installed by deploy/install.sh (user or system scope).
+[Unit]
+Description=Visual Intelligence Engine (dashboard, database, MCP)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@APP_DIR@
+EnvironmentFile=-@ENV_FILE@
+ExecStart=@NODE@ bin/start.mjs
+Restart=on-failure
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=20
+# Hard resource ceilings: this host runs other services.
+MemoryHigh=900M
+MemoryMax=1200M
+CPUQuota=200%
+TasksMax=256
+Nice=5
+# Hardening (the service needs only its own directory and the media/data dirs)
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@DATA_DIR@
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=@WANTED_BY@

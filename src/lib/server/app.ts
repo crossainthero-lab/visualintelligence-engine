@@ -6,6 +6,7 @@ import { getSettings } from '#core/settings.ts';
 import { runner } from '#core/analysis/runner.ts';
 import { applyMediaLimits, generateMissingThumbnails } from '#core/media.ts';
 import { absPath } from '#core/videos.ts';
+import { detectProviders } from '#core/analysis/providers/index.ts';
 
 let ready: ReturnType<typeof init> | null = null;
 export function ensureReady() {
@@ -32,6 +33,7 @@ async function init() {
 		console.error('[vie] session import failed:', e);
 	}
 	runner.watch(db);
+	void detectProviders().catch(() => {}); // detection only (version / model list); never calls a model
 	if (getSettings(db).media.autoThumbnails) {
 		// Low-priority, one at a time, only for videos without a thumbnail. Idle when everything has one.
 		void generateMissingThumbnails(db, (v) => absPath(db, v));

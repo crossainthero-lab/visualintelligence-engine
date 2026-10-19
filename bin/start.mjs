@@ -22,10 +22,24 @@ if (!loopback && !process.env.VIE_AUTH_TOKEN && process.env.VIE_TRUSTED_LAN !== 
 	process.exit(2);
 }
 if (!loopback) console.log(process.env.VIE_AUTH_TOKEN ? `Access token required for ${host}.` : `WARNING: ${host} is open to your LAN without authentication (VIE_TRUSTED_LAN=1).`);
-process.env.HOST = host;
-process.env.PORT = port;
-if (process.env.VIE_ORIGIN) process.env.ORIGIN = process.env.VIE_ORIGIN; // only needed behind a TLS-terminating reverse proxy
+process.env.PROTOCOL_HEADER ||= 'x-forwarded-proto'; // adapter-node assumes https unless told: we serve plain http by default
+if (process.env.VIE_ORIGIN) process.env.ORIGIN = process.env.VIE_ORIGIN; // fixed public origin behind a TLS reverse proxy
 process.env.BODY_SIZE_LIMIT ??= '8M';
-console.log(`Visual Intelligence Engine → http://${host}:${port}`);
-await import(pathToFileURL(entry).href);
-for (const s of ['SIGTERM', 'SIGINT']) process.on(s, () => process.exit(0));
+
+const { handler } = await import(pathToFileURL(join(root, 'build', 'handler.js')).href);
+const { createServer } = await import('node:http');
+const scheme = process.env.VIE_PROTOCOL || 'http';
+const server = createServer((req, res) => {
+	// A reverse proxy sets x-forwarded-proto itself; direct connections are plain http.
+	if (!req.headers['x-forwarded-proto']) req.headers['x-forwarded-proto'] = scheme;
+	handler(req, res, () => ((res.statusCode = 404), res.end('Not found')));
+});
+server.keepAliveTimeout = 5000;
+server.listen({ host, port: Number(port) }, () => {
+	console.log(`Visual Intelligence Engine → http://${host}:${port}`);
+	console.log(`Listening on http://${host}:${port}`);
+});
+const stop = () => server.close(() => process.exit(0));
+process.on('SIGTERM', stop);
+process.on('SIGINT', stop);
+setTimeout(() => {}, 0);

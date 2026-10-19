@@ -25,6 +25,7 @@
 	let reanalyse = $state(false);
 
 	let providers = $state<any[]>([]);
+	let detected = $state(false);
 	let profiles = $state<any[]>([]);
 	let sessions = $state<any[]>([]);
 	let batches = $state<any[]>([]);
@@ -42,9 +43,10 @@
 	if (q0.get('video')) selection.addMany([q0.get('video')!]);
 
 	$effect(() => {
+		api('/api/profiles').then((r) => (profiles = r.profiles));
 		api('/api/providers').then((r) => {
 			providers = r.providers;
-			profiles = r.profiles;
+			detected = true;
 			if (!provider) provider = r.providers.find((p: any) => p.available)?.id ?? '';
 		});
 		api('/api/sessions?limit=500').then((r) => (sessions = r.sessions));
@@ -222,7 +224,7 @@
 							</div>
 						{/if}
 					</div>
-				{:else}<div class="skel" style="height:60px"></div>{/each}
+				{:else}{#if !detected}<div class="notice">Detecting installed agents…</div>{/if}{/each}
 				{#if needsProvider && prov?.models?.length}
 					<label class="f">Model<select bind:value={model}><option value="">{prov.defaultModel ? `default (${prov.defaultModel})` : 'provider default'}</option>{#each prov.models as m (m)}<option value={m}>{m}</option>{/each}</select></label>
 				{/if}

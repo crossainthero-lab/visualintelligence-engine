@@ -50,8 +50,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (pathname === '/login' && event.request.method === 'POST') {
 			const form = await event.request.formData();
 			if (eq(String(form.get('token') ?? ''), token)) {
-				event.cookies.set(COOKIE, sign(token), { path: '/', httpOnly: true, sameSite: 'strict', secure: event.url.protocol === 'https:', maxAge: 60 * 60 * 24 * 30 });
-				throw redirect(303, String(form.get('next') || '/'));
+				const next = String(form.get('next') || '/');
+				const secure = event.url.protocol === 'https:' || event.request.headers.get('x-forwarded-proto') === 'https';
+				const cookie = `${COOKIE}=${sign(token)}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${60 * 60 * 24 * 30}${secure ? '; Secure' : ''}`;
+				return new Response(null, { status: 303, headers: { location: next.startsWith('/') && !next.startsWith('//') ? next : '/', 'set-cookie': cookie } });
 			}
 			return new Response(null, { status: 303, headers: { location: '/login?error=1' } });
 		}

@@ -99,7 +99,7 @@ const COLS = `v.id, v.uid, v.platform_id, v.url, c.username AS creator, c.profil
 	(SELECT group_concat(t.name, ',') FROM video_tags vt JOIN tags t ON t.id=vt.tag_id WHERE vt.video_id=v.id) AS tags,
 	(SELECT COUNT(*) FROM session_videos sv WHERE sv.video_id=v.id) AS session_count`;
 
-function shape(r: Row) {
+function shape(r: Row): Row & { hashtags: string[]; tags: string[]; bookmarked: boolean; has_audio: boolean | null; file_missing: boolean; has_thumb: boolean } {
 	return {
 		...r,
 		hashtags: parseJson<string[]>(r.hashtags, []),

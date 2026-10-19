@@ -32,6 +32,8 @@ class Client:
         h = {"Authorization": f"Bearer {self.token}", **(headers or {})}
         if data is not None and not raw:
             data, h["content-type"] = json.dumps(data).encode(), "application/json"
+        elif data is not None:
+            h.setdefault("content-type", "application/octet-stream")  # urllib would say form-urlencoded (CSRF-blocked)
         r = urllib.request.Request(self.base + path, data=data, method=method, headers=h)
         try:
             with urllib.request.urlopen(r, timeout=120) as resp:
