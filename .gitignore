@@ -15,6 +15,7 @@ dataset/
 node_modules/
 .svelte-kit/
 build/
+build-cli/
 data/
 *.sqlite
 *.sqlite-wal
